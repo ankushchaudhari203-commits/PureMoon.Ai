@@ -273,13 +273,23 @@ const handleDownloadPDF = async () => {
   */
 
   const mergedTrip = data.reduce((acc: any, msg: any) => {
+
   if (msg.trip_data) {
-    return { ...acc, ...msg.trip_data };
+    return {
+      ...acc,
+      ...msg.trip_data,
+      split_expense: msg.trip_data.split_expense || acc.split_expense
+    };
   }
+
   return acc;
+
 }, {});
 
 if (Object.keys(mergedTrip).length > 0) {
+  setSplitResult(mergedTrip.split_expense || []);
+  setTravelServices(mergedTrip.travel_services || null);
+  setWeather(mergedTrip.weather || null);
 
   const trip = mergedTrip;
 
@@ -515,10 +525,16 @@ setWeather(data.weather);
 
       <SplitExpense
         onClose={() => setShowSplit(false)}
-        onResult={(res: string[]) => {
-          setSplitResult(res);
-          setShowSplit(false);
-        }}
+        onResult={async (res: string[]) => {
+  setSplitResult(res);
+  setShowSplit(false);
+
+  if (conversationId) {
+    await saveMessage(conversationId, "ai", "Split expense calculated", {
+      split_expense: res
+    });
+  }
+}}
       />
 
     </div>
@@ -977,20 +993,6 @@ setWeather(data.weather);
   </div>
 )}
 
-        <div className="mt-8 border-t border-white/10 pt-4">
-
-  <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">
-    Controls
-  </p>
-
-  <button
-    onClick={resetTrip}
-    className="text-sm text-purple-400 hover:text-purple-300 transition"
-  >
-    Reset Trip
-  </button>
-
-</div>
 
         {travelServices && (
   <div className="mt-6 border-t border-gray-700 pt-4">
