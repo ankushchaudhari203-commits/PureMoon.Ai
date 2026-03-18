@@ -83,6 +83,8 @@ export default function ChatWindow({
   const [weather, setWeather] = useState<any>(null);
   const [showSplit, setShowSplit] = useState(false);
   const [splitResult, setSplitResult] = useState<string[]>([]);
+  const [splitDetails, setSplitDetails] = useState<any>(null);
+  
 
   const [foodPlaces, setFoodPlaces] = useState<any[]>([]);
 
@@ -290,6 +292,7 @@ if (Object.keys(mergedTrip).length > 0) {
   setSplitResult(mergedTrip.split_expense || []);
   setTravelServices(mergedTrip.travel_services || null);
   setWeather(mergedTrip.weather || null);
+  setSplitDetails(mergedTrip.split_details || null);
 
   const trip = mergedTrip;
 
@@ -525,13 +528,15 @@ setWeather(data.weather);
 
       <SplitExpense
         onClose={() => setShowSplit(false)}
-        onResult={async (res: string[]) => {
+        onResult={async (res: string[], peopleData: any) => {
   setSplitResult(res);
-  setShowSplit(false);
+  setSplitDetails(peopleData);   // ✅ NEW
+  
 
   if (conversationId) {
     await saveMessage(conversationId, "ai", "Split expense calculated", {
-      split_expense: res
+      split_expense: res,
+      split_details: peopleData   // ✅ SAVE THIS TOO
     });
   }
 }}
