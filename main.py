@@ -1,16 +1,32 @@
 import os
 from dotenv import load_dotenv
-
-# Load env FIRST
-load_dotenv(dotenv_path=".env")
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# ✅ Create app FIRST
+# ---------------------------------------------------
+# ✅ LOAD ENV (EXPLICIT + SAFE)
+# ---------------------------------------------------
+
+env_path = os.path.join(os.getcwd(), ".env")
+
+print("🔥 USING ENV FILE:", env_path)
+print("🔥 EXISTS:", os.path.exists(env_path))
+
+load_dotenv(env_path)
+
+print("🔥 SESSION LIMIT:", os.getenv("SESSION_LIMIT"))
+print("🔥 ENVIRONMENT:", os.getenv("ENVIRONMENT"))
+
+# ---------------------------------------------------
+# ✅ CREATE FASTAPI APP
+# ---------------------------------------------------
+
 app = FastAPI()
 
-# ✅ Add middleware
+# ---------------------------------------------------
+# ✅ CORS CONFIG
+# ---------------------------------------------------
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -19,10 +35,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Import routers AFTER app creation (clean practice)
+# ---------------------------------------------------
+# ✅ IMPORT ROUTES (AFTER ENV + APP INIT)
+# ---------------------------------------------------
+
 from api.travel_routes import router as travel_router
 from api.chat_routes import router as chat_router
 
-# ✅ Include routers
+# ---------------------------------------------------
+# ✅ INCLUDE ROUTERS
+# ---------------------------------------------------
+
 app.include_router(travel_router)
 app.include_router(chat_router)

@@ -427,19 +427,39 @@ setTripAdvice(trip.trip_advice || null);
     }
 
     try {
-
+      
+      const sessionId = "test_user_1"; 
       const response = await fetch("http://localhost:8000/travel/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          session_id: convId || "temp-session",
+          session_id: sessionId,
           message: text,
         }),
       });
 
       const data = await response.json();
+
+      if (data.state === "limit_exceeded") {
+  setThinking(false);
+
+  // Option 1: simple alert
+  alert("⚠️ You have reached your free limit. Try again after 24 hours.");
+
+  // Option 2 (better UX): show in chat
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: "ai",
+      content: "⚠️ You have reached your free limit. Please try again after 24 hours."
+    }
+  ]);
+
+  return; // 🚨 VERY IMPORTANT (stops execution)
+}
+
       console.log("FULL BACKEND RESPONSE:", data);
 
       if (data.itinerary) {
