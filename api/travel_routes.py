@@ -57,7 +57,7 @@ def travel_chat(chat_input: ChatInput):
     print("🚨 LIMIT:", session_manager.limit)
     print("🚨 CONDITION:", count > session_manager.limit)
 
-    if count >= session_manager.limit:
+    if count > session_manager.limit: #I have changed this from >= to > remember this logic for session management.
         return {
             "reply": "⚠️ You have reached your free limit for today.",
             "state": "limit_exceeded"

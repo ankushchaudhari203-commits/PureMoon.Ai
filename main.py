@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from api.analytics_routes import router as analytics_router
 
 # ---------------------------------------------------
 # ✅ LOAD ENV (EXPLICIT + SAFE)
@@ -48,3 +49,4 @@ from api.chat_routes import router as chat_router
 
 app.include_router(travel_router)
 app.include_router(chat_router)
+app.include_router(analytics_router)

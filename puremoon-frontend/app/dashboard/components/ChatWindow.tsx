@@ -7,6 +7,7 @@ import { createConversation, saveMessage } from "@/lib/chatService";
 import { getMessages } from "@/lib/historyService";
 import jsPDF from "jspdf";
 import SplitExpense from "./SplitExpense";
+import { trackEvent } from "@/lib/analytics";
 
 const TripMap = dynamic(() => import("./TripMap"), {
   ssr: false
@@ -411,6 +412,10 @@ setTripAdvice(trip.trip_advice || null);
       content: text,
     };
 
+    trackEvent("message_sent", {
+    text_length: text.length,
+    });
+
     setMessages((prev) => [...prev, userMessage]);
     setThinking(true);
     setShowWelcome(false);
@@ -428,7 +433,11 @@ setTripAdvice(trip.trip_advice || null);
 
     try {
       
-      const sessionId = "test_user_1"; 
+      const sessionId = localStorage.getItem("session_id") //added logic for session management
+      || crypto.randomUUID();//added logic for session management
+
+      localStorage.setItem("session_id", sessionId); //added logic for session management
+      
       const response = await fetch("http://localhost:8000/travel/chat", {
         method: "POST",
         headers: {
@@ -441,8 +450,15 @@ setTripAdvice(trip.trip_advice || null);
       });
 
       const data = await response.json();
+      if (data.itinerary) {
+        trackEvent("itinerary_generated", {
+          destination: data.trip_data?.destination || "unknown",
+          days: data.trip_data?.duration || "unknown",
+  });
+}
 
       if (data.state === "limit_exceeded") {
+        trackEvent("limit_exceeded");
   setThinking(false);
 
   // Option 1: simple alert
@@ -453,7 +469,7 @@ setTripAdvice(trip.trip_advice || null);
     ...prev,
     {
       role: "ai",
-      content: "⚠️ You have reached your free limit. Please try again after 24 hours."
+      content: "🚫 Free limit reached.\n\nUpgrade coming soon 🚀"
     }
   ]);
 
@@ -547,8 +563,14 @@ setWeather(data.weather);
     <div className="bg-[#0F172A] p-6 rounded-xl w-[420px] border border-white/10 shadow-xl">
 
       <SplitExpense
-        onClose={() => setShowSplit(false)}
+        onClose={() => {
+  trackEvent("split_closed");
+  setShowSplit(false);
+}}
         onResult={async (res: string[], peopleData: any) => {
+
+          
+
   setSplitResult(res);
   setSplitDetails(peopleData);   // ✅ NEW
   
@@ -1030,32 +1052,46 @@ setWeather(data.weather);
       <p className="text-base font-semibold text-gray-200 mb-1">🚗 Car Rentals</p>
 
       {travelServices.car_rentals?.map((item:any, i:number) => (
-        <a
-          key={i}
-          href={item.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
-        >
-          {item.name}
-        </a>
-      ))}
+  <a
+    key={i}
+    href={item.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    onClick={() => {
+      setTimeout(() => {
+        trackEvent("car_rental_clicked", {
+          provider: item.name
+        });
+      }, 0);
+    }}
+    className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
+  >
+    {item.name}
+  </a>
+))}
     </div>
 
     <div>
       <p className="text-base font-semibold text-gray-200 mb-1">🍔 Food Delivery</p>
 
       {travelServices.food_delivery?.map((item:any, i:number) => (
-        <a
-          key={i}
-          href={item.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
-        >
-          {item.name}
-        </a>
-      ))}
+  <a
+    key={i}
+    href={item.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    onClick={() => {
+      setTimeout(() => {
+        trackEvent("food_delivery_clicked", {
+          provider: item.name
+        });
+      }, 0);
+    }}
+    className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
+  >
+    {item.name}
+  </a>
+))}
     </div>
 {/* Flights */}
 <div className="mt-4">
@@ -1064,33 +1100,60 @@ setWeather(data.weather);
   </p>
 
   <a
-    href={`https://www.google.com/travel/flights?q=flights+to+${flightDestination}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
-  >
-    Google Flights
-  </a>
+  href={`https://www.google.com/travel/flights?q=flights+to+${flightDestination}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  onClick={() => {
+    setTimeout(() => {
+      trackEvent("flight_clicked", {
+        provider: "Google Flights",
+        destination: flightDestination
+      });
+    }, 0);
+  }}
+  className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
+>
+  Google Flights
+</a>
 
   <a
-    href={`https://www.kayak.com/flights/${flightDestination}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
-  >
-    Kayak
-  </a>
+  href={`https://www.kayak.com/flights/${flightDestination}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  onClick={() => {
+    setTimeout(() => {
+      trackEvent("flight_clicked", {
+        provider: "Kayak",
+        destination: flightDestination
+      });
+    }, 0);
+  }}
+  className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
+>
+  Kayak
+</a>
 
   <a
-    href={`https://www.expedia.com/Flights-Search?trip=oneway&leg1=to:${flightDestination}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
-  >
-    Expedia
-  </a>
+  href={`https://www.expedia.com/Flights-Search?trip=oneway&leg1=to:${flightDestination}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  onClick={() => {
+    setTimeout(() => {
+      trackEvent("flight_clicked", {
+        provider: "Expedia",
+        destination: flightDestination
+      });
+    }, 0);
+  }}
+  className="inline-block px-3 py-1.5 mr-2 mt-2 text-sm rounded-lg bg-white/5 border border-white/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 transition"
+>
+  Expedia
+</a>
   <button
-  onClick={() => setShowSplit(true)}
+  onClick={() => {
+  trackEvent("split_opened");
+  setShowSplit(true);
+}}
   className="mt-4 w-full px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700 transition"
 >
   💸 Split Expenses

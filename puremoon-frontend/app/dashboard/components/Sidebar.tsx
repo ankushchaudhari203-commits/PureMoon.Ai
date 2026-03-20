@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { trackEvent } from "@/lib/analytics";
 
 type SidebarProps = {
   onHelp: () => void;
@@ -85,7 +86,10 @@ export default function Sidebar({
 
       {/* New Chat */}
       <button
-        onClick={onNewChat}
+        onClick={() => {
+        trackEvent("new_chat_clicked");
+        onNewChat();
+        }}
         className="mb-8 px-5 py-3 rounded-xl
                    bg-gradient-to-r from-purple-600 to-blue-600
                    text-white text-[15px] font-medium
@@ -154,7 +158,12 @@ export default function Sidebar({
       <div className="relative mt-6 border-t border-white/5 pt-6">
 
         <button
-          onClick={() => setOpen(!open)}
+          onClick={() => {
+  const newState = !open;
+  setOpen(newState);
+
+  trackEvent(newState ? "settings_opened" : "settings_closed");
+}}
           className="text-[15px] font-medium text-gray-400 hover:text-white transition"
         >
           Settings
@@ -167,7 +176,10 @@ export default function Sidebar({
                           shadow-xl mt-3 overflow-hidden">
 
             <div
-              onClick={() => router.push("/")}
+              onClick={() => {
+              trackEvent("exit_clicked");
+              router.push("/");
+              }}
               className="px-4 py-3 text-[15px] text-gray-300 hover:bg-white/10 cursor-pointer"
             >
               Exit
@@ -175,6 +187,7 @@ export default function Sidebar({
 
             <div
               onClick={() => {
+                trackEvent("help_clicked");
                 onHelp();
                 setOpen(false);
               }}
@@ -184,11 +197,12 @@ export default function Sidebar({
             </div>
 
             <div
-              onClick={() =>
+              onClick={() => {
+               trackEvent("feedback_clicked");
                 window.open(
                   "https://docs.google.com/forms/d/e/1FAIpQLSdTiDgt92Ss8TenhzhKXt0BLfYZFuRQgK-mq77nVBxqrIzyJA/viewform?usp=header"
                 )
-              }
+              }}
               className="px-4 py-3 text-[15px] text-gray-300 hover:bg-white/10 cursor-pointer"
             >
               Feedback
