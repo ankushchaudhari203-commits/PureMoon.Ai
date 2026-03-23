@@ -15,6 +15,7 @@ from core.nlp.hybrid_extractor import HybridTravelExtractor
 from core.nlp.food_intent_classifier import FoodIntentClassifier
 from app.services.travel_services import TravelServices
 
+
 from app.services.places_service import PlacesService
 from app.services.trip_enrichment_service import TripEnrichmentService
 
@@ -31,6 +32,7 @@ modifier = TripModificationEngine()
 food_classifier = FoodIntentClassifier()
 travel_services = TravelServices()
 weather_service = WeatherService()
+
 
 extractor = HybridTravelExtractor(api_key=os.getenv("GEMINI_API_KEY"))
 places_service = PlacesService()
@@ -98,7 +100,7 @@ def travel_chat(chat_input: ChatInput):
                 "nightlife": nightlife or [],
                 "itinerary": [
                     {"day": d.day, "activities": d.activities}
-                    for d in itinerary
+                    for d in (itinerary or [])
                 ],
                 "restaurants": restaurants or [],
                 "hotels": hotels or [],
@@ -108,9 +110,60 @@ def travel_chat(chat_input: ChatInput):
             }
 
     # ------------------------------
+    # Food logic (ADD THIS)
+    # ------------------------------
+
+    food = []
+
+    if food_intent == "budget_food":
+        food = places_service.search_places(f"cheap food in {destination}")
+
+    elif food_intent == "italian_food":
+        food = places_service.search_places(f"italian restaurants in {destination}")
+
+    elif food_intent == "vegetarian_food":
+        food = places_service.search_places(f"vegetarian restaurants in {destination}")
+
+    elif food_intent == "late_night_food":
+        food = places_service.search_places(f"late night food in {destination}")
+
+    elif food_intent == "general_food":
+        food = enrichment_service.generate_food(destination)
+
+    # 🚨 THIS IS IMPORTANT
+    if destination and food_intent and (
+    "food" in message_lower or
+    "eat" in message_lower or
+    "restaurant" in message_lower or
+    "dining" in message_lower
+):
+
+        itinerary = session_manager.get_itinerary(chat_input.session_id) or []
+
+        restaurants = places_service.get_restaurants(destination)
+        hotels = places_service.get_hotels(destination)
+        weather = weather_service.get_weather(destination)
+
+        return {
+            "reply": f"Here are some food spots in {destination}.",
+            "food": food or [],
+            "itinerary": [
+                {"day": d.day, "activities": d.activities}
+                for d in (itinerary or [])
+            ],
+            "restaurants": restaurants or [],
+            "hotels": hotels or [],
+            "weather": weather,
+            "travel_services": travel_service_links or [],
+            "trip_data": {"destination": destination}
+        }        
+
+    # ------------------------------
     # Extract travel request
     # ------------------------------
     parsed_request, confidence = extractor.extract(user_message)
+
+    
 
     print("🧠 MESSAGE:", user_message)
     print("🧠 EXTRACTED DEST:", parsed_request.destination)

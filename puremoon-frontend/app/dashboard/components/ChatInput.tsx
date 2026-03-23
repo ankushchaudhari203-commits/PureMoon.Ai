@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+
 
 export default function ChatInput({
   onSend,
+  showActions
 }: {
   onSend: (text: string) => void;
+  showActions?: boolean;
 }) {
 
   const [text, setText] = useState("");
+  const [showFoodOptions, setShowFoodOptions] = useState(false);
 
   const handleSend = () => {
     if (!text.trim()) return;
@@ -18,31 +23,101 @@ export default function ChatInput({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col">
 
       {/* ✅ DISCLAIMER */}
       <p className="text-xs text-white-400 text-center mb-2">
-   ⚠️PureMoon may make mistakes. Please verify and validate the information.
-</p>
+        ⚠️ PureMoon may make mistakes. Please verify and validate the information.
+      </p>
 
-      {/* INPUT CONTAINER */}
+      {showActions && (
+  <>
+    {/* 🔥 ANIMATED ACTION BUTTONS */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="flex gap-3 mb-3 justify-center"
+    >
+
+      {/* 🍜 FOOD BUTTON */}
+      <motion.button
+        onClick={() => setShowFoodOptions(!showFoodOptions)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="px-4 py-2 rounded-lg bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30"
+      >
+        🍜 Food
+      </motion.button>
+
+      {/* 🌙 NIGHTLIFE BUTTON */}
+      <motion.button
+        onClick={() => onSend("show nightlife")}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="px-4 py-2 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-300 hover:bg-blue-500/30"
+      >
+        🌙 Nightlife
+      </motion.button>
+
+    </motion.div>
+
+    {/* 🔥 ANIMATED FOOD POPUP */}
+    {showFoodOptions && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.25 }}
+        className="mb-3 p-3 rounded-xl bg-[#0F172A] border border-white/10"
+      >
+
+        <p className="text-sm text-gray-400 mb-2 text-center">
+          Choose food type:
+        </p>
+
+        <div className="flex flex-wrap gap-2 justify-center">
+
+          {[
+            { label: "Cheap Food", value: "cheap food" },
+            { label: "Italian Food", value: "italian food" },
+            { label: "Vegetarian Food", value: "vegetarian food" },
+            { label: "Late Night Food", value: "late night food" }
+          ].map((option, i) => (
+            <motion.button
+              key={i}
+              onClick={() => {
+                onSend(option.value);
+                setShowFoodOptions(false);
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-300 hover:bg-purple-500/20 hover:border-purple-400"
+            >
+              {option.label}
+            </motion.button>
+          ))}
+
+        </div>
+
+      </motion.div>
+    )}
+  </>
+)}
+
+      {/* ✅ INPUT (always visible) */}
       <div className="flex items-center gap-3 bg-[#0F172A] border border-white/10 rounded-xl px-4 py-3">
 
-        {/* INPUT FIELD */}
         <input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSend();
-            }
+            if (e.key === "Enter") handleSend();
           }}
           placeholder="Start with: Plan a 3 day trip to Austin in budget $500"
           className="flex-1 bg-transparent outline-none text-gray-200 placeholder-gray-500"
         />
 
-        {/* SEND BUTTON */}
         <button
           onClick={handleSend}
           className="px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm hover:opacity-90 transition"
@@ -51,6 +126,7 @@ export default function ChatInput({
         </button>
 
       </div>
+
     </div>
   );
 }

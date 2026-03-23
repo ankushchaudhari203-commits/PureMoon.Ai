@@ -957,7 +957,10 @@ setWeather(data.weather);
 
         
         <div className="sticky bottom-0 bg-[#0B0F1A] px-16 py-6 border-t border-white/10">
-  <ChatInput onSend={sendMessage} />
+  <ChatInput 
+  onSend={sendMessage} 
+  showActions={(itinerary?.length || 0) > 0 && !thinking}
+/>
 </div>
 
       </div>
