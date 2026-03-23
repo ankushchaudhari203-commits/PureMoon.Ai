@@ -10,6 +10,7 @@ export const trackEvent = async (
       },
       body: JSON.stringify({
         session_id: "test_user_1", // later dynamic
+            
         event_name: eventName,
         metadata: metadata,
       }),

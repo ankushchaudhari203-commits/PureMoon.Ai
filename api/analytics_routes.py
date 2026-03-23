@@ -12,6 +12,7 @@ class EventRequest(BaseModel):
     session_id: str
     event_name: str
     metadata: dict = {}
+     
 
 
 @router.post("/analytics/track")

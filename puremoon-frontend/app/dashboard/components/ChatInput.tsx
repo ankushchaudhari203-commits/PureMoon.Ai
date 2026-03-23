@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { trackEvent } from "@/lib/analytics";
 
 
 export default function ChatInput({
@@ -42,7 +43,15 @@ export default function ChatInput({
 
       {/* 🍜 FOOD BUTTON */}
       <motion.button
-        onClick={() => setShowFoodOptions(!showFoodOptions)}
+        onClick={() => {
+  const newState = !showFoodOptions;
+
+  trackEvent("food_menu_toggled", {
+    state: newState ? "opened" : "closed"
+  });
+
+  setShowFoodOptions(newState);
+}}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="px-4 py-2 rounded-lg bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30"
@@ -52,7 +61,10 @@ export default function ChatInput({
 
       {/* 🌙 NIGHTLIFE BUTTON */}
       <motion.button
-        onClick={() => onSend("show nightlife")}
+        onClick={() => {
+  trackEvent("nightlife_clicked");
+  onSend("show nightlife");
+}}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="px-4 py-2 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-300 hover:bg-blue-500/30"
@@ -78,24 +90,32 @@ export default function ChatInput({
         <div className="flex flex-wrap gap-2 justify-center">
 
           {[
-            { label: "Cheap Food", value: "cheap food" },
-            { label: "Italian Food", value: "italian food" },
-            { label: "Vegetarian Food", value: "vegetarian food" },
-            { label: "Late Night Food", value: "late night food" }
-          ].map((option, i) => (
-            <motion.button
-              key={i}
-              onClick={() => {
-                onSend(option.value);
-                setShowFoodOptions(false);
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-300 hover:bg-purple-500/20 hover:border-purple-400"
-            >
-              {option.label}
-            </motion.button>
-          ))}
+  { label: "Cheap Food", value: "cheap food", category: "cheap" },
+  { label: "Italian Food", value: "italian food", category: "italian" },
+  { label: "Vegetarian Food", value: "vegetarian food", category: "vegetarian" },
+  { label: "Late Night Food", value: "late night food", category: "late_night" }
+].map((option, i) => (
+  <motion.button
+    key={i}
+    onClick={() => {
+
+  // 🔥 non-blocking safe analytics
+  queueMicrotask(() => {
+    trackEvent("food_option_selected", {
+      category: option.category
+    });
+  });
+
+  onSend(option.value);
+  setShowFoodOptions(false);
+}}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-300 hover:bg-purple-500/20 hover:border-purple-400"
+  >
+    {option.label}
+  </motion.button>
+))}
 
         </div>
 
