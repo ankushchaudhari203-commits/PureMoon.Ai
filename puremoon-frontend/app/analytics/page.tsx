@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 import {
   BarChart,
   Bar,
@@ -15,8 +16,7 @@ export default function AnalyticsPage() {
   const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/analytics/events")
-      .then(res => res.json())
+    apiFetch("/analytics/events")
       .then(data => setEvents(data.events || []))
       .catch(console.error);
   }, []);

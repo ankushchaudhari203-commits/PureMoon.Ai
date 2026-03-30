@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.analytics_routes import router as analytics_router
+from api.data_routes import router as data_router
 
 # ---------------------------------------------------
 # ✅ LOAD ENV (EXPLICIT + SAFE)
@@ -28,9 +29,14 @@ app = FastAPI()
 # ✅ CORS CONFIG
 # ---------------------------------------------------
 
+allowed_origins = ["http://localhost:3000"]
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,3 +56,4 @@ from api.chat_routes import router as chat_router
 app.include_router(travel_router)
 app.include_router(chat_router)
 app.include_router(analytics_router)
+app.include_router(data_router)

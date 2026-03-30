@@ -1,15 +1,8 @@
 from fastapi import APIRouter
-from supabase import create_client
-import os
+from api.db import get_supabase
 
 # ✅ Single router with prefix
 router = APIRouter(prefix="/chat")
-
-# ✅ Supabase client
-supabase = create_client(
-    os.getenv("SUPABASE_URL"),
-    os.getenv("SUPABASE_KEY")
-)
 
 
 # ----------------------------------------
@@ -17,6 +10,7 @@ supabase = create_client(
 # ----------------------------------------
 @router.delete("/delete/{conversation_id}")
 def delete_conversation(conversation_id: str):
+    supabase = get_supabase()
 
     # delete messages first
     supabase.table("messages").delete().eq(
@@ -41,6 +35,7 @@ def delete_conversation(conversation_id: str):
 # ----------------------------------------
 @router.delete("/clear-all")
 def clear_all_conversations():
+    supabase = get_supabase()
 
     try:
         # ✅ safe delete using condition

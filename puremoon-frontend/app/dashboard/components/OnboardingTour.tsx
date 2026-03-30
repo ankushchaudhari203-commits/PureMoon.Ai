@@ -31,7 +31,7 @@ const TOUR_STEPS: Record<TourStep, { title: string; description: string; icon: s
   },
   input: {
     title: "Ask PureMoon",
-    description: "Type your travel questions, preferences, or requirements. PureMoon will help plan your trip!",
+    description: "Type your travel questions, preferences, or requirements. Exmples :plan a 2 day trip to Maimi in budget 500$",
     icon: "💬",
   },
   null: { title: "", description: "", icon: "" },

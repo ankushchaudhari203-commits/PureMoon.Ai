@@ -6,6 +6,7 @@ import ChatInput from "./ChatInput";
 import dynamic from "next/dynamic";
 import { createConversation, saveMessage } from "@/lib/chatService";
 import { getMessages } from "@/lib/historyService";
+import { apiFetch } from "@/lib/api";
 import jsPDF from "jspdf";
 import SplitExpense from "./SplitExpense";
 import { trackEvent } from "@/lib/analytics";
@@ -529,18 +530,14 @@ const handleDownloadPDF = async () => {
 
       localStorage.setItem("session_id", sessionId); //added logic for session management
       
-      const response = await fetch("http://localhost:8000/travel/chat", {
+      const data = await apiFetch("/travel/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        json: {
           session_id: sessionId,
           message: text,
-        }),
+          user_email: session?.user?.email || null,
+        },
       });
-
-      const data = await response.json();
       if (data.itinerary) {
         trackEvent("itinerary_generated", {
           destination: data.trip_data?.destination || "unknown",

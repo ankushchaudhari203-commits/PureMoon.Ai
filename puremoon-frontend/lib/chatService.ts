@@ -1,24 +1,20 @@
-import { supabase } from "./supabase";
+import { apiFetch } from "./api";
 
 export async function createConversation(title: string, userEmail?: string) {
+  try {
+    const data = await apiFetch("/conversations", {
+      method: "POST",
+      json: {
+        title,
+        user_email: userEmail || null,
+      },
+    });
 
-  const shortTitle =
-    title.length > 30 ? title.substring(0, 30) + "..." : title;
-
-  const { data, error } = await supabase
-    .from("conversations")
-    .insert({
-      title: shortTitle,
-      user_id: userEmail || null
-    })
-    .select();
-
-  if (error) {
+    return data?.id || null;
+  } catch (error) {
     console.error("Conversation error:", error);
     return null;
   }
-
-  return data?.[0]?.id || null;
 }
 
 export async function saveMessage(
@@ -28,19 +24,21 @@ export async function saveMessage(
   tripData?: any,
   userEmail?: string
 ) {
-  const { data, error } = await supabase.from("messages").insert([
-    {
-      conversation_id: conversationId,
-      role,
-      content,
-      trip_data: tripData || null,
-      user_id: userEmail || null
-    }
-  ]);
+  try {
+    const data = await apiFetch("/messages", {
+      method: "POST",
+      json: {
+        conversation_id: conversationId,
+        role,
+        content,
+        trip_data: tripData || null,
+        user_email: userEmail || null,
+      },
+    });
 
-  if (error) {
+    return { data: data?.data || [], error: null };
+  } catch (error) {
     console.error("Save message error:", error);
+    return { data: null, error };
   }
-
-  return { data, error };
 }

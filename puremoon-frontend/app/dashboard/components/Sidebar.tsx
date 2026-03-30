@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { trackEvent } from "@/lib/analytics";
+import { getConversations } from "@/lib/historyService";
+import { apiFetch } from "@/lib/api";
 import type { TourStep } from "./OnboardingTour";
 
 type SidebarProps = {
@@ -31,13 +32,12 @@ export default function Sidebar({
 
   // ✅ Load History
   const loadHistory = async () => {
-    const { data, error } = await supabase
-      .from("conversations")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (data) setHistory(data);
-    if (error) console.error("History load error:", error);
+    try {
+      const data = await getConversations();
+      setHistory(data);
+    } catch (error) {
+      console.error("History load error:", error);
+    }
   };
 
   // ✅ Delete Single Conversation
@@ -46,7 +46,7 @@ export default function Sidebar({
     if (!confirmDelete) return;
 
     try {
-      await fetch(`http://localhost:8000/chat/delete/${id}`, {
+      await apiFetch(`/chat/delete/${id}`, {
         method: "DELETE",
       });
 
@@ -64,7 +64,7 @@ export default function Sidebar({
     if (!confirmDelete) return;
 
     try {
-      await fetch(`http://localhost:8000/chat/clear-all`, {
+      await apiFetch("/chat/clear-all", {
         method: "DELETE",
       });
 

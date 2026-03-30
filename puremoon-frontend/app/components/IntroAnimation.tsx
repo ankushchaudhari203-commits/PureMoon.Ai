@@ -6,40 +6,78 @@ import { useEffect } from "react";
 export default function IntroAnimation({ onFinish }: { onFinish: () => void }) {
   
   useEffect(() => {
-  // PUREMOON COSMIC TONE
-  const audioContext = new (window.AudioContext ||
-    (window as any).webkitAudioContext)();
+    const AudioContextClass =
+      window.AudioContext || (window as any).webkitAudioContext;
 
-  const osc1 = audioContext.createOscillator();
-  const osc2 = audioContext.createOscillator();
-  const gain = audioContext.createGain();
+    let audioContext: AudioContext | null = null;
+    let started = false;
 
-  // Two-layer tone (more magical)
-  osc1.type = "sine";
-  osc1.frequency.setValueAtTime(261.63, audioContext.currentTime); // C
+    const removeListeners = () => {
+      window.removeEventListener("pointerdown", startTone);
+      window.removeEventListener("touchstart", startTone);
+      window.removeEventListener("keydown", startTone);
+    };
 
-  osc2.type = "sine";
-  osc2.frequency.setValueAtTime(329.63, audioContext.currentTime); // E
+    const startTone = async () => {
+      if (started || !AudioContextClass) return;
 
-  gain.gain.setValueAtTime(0.001, audioContext.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.15, audioContext.currentTime + 0.6);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 3);
+      if (!audioContext) {
+        audioContext = new AudioContextClass();
+      }
 
-  osc1.connect(gain);
-  osc2.connect(gain);
-  gain.connect(audioContext.destination);
+      try {
+        if (audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
 
-  osc1.start();
-  osc2.start();
-  osc1.stop(audioContext.currentTime + 3);
-  osc2.stop(audioContext.currentTime + 3);
+        const osc1 = audioContext.createOscillator();
+        const osc2 = audioContext.createOscillator();
+        const gain = audioContext.createGain();
 
-  const timer = setTimeout(() => {
-    onFinish();
-  }, 7500);
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(261.63, audioContext.currentTime);
 
-  return () => clearTimeout(timer);
-}, [onFinish]);
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(329.63, audioContext.currentTime);
+
+        gain.gain.setValueAtTime(0.001, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.15, audioContext.currentTime + 0.6);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 3);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc1.start();
+        osc2.start();
+        osc1.stop(audioContext.currentTime + 3);
+        osc2.stop(audioContext.currentTime + 3);
+
+        started = true;
+        removeListeners();
+      } catch (error) {
+        console.warn("Intro audio is waiting for user interaction.", error);
+      }
+    };
+
+    startTone();
+
+    window.addEventListener("pointerdown", startTone, { once: true });
+    window.addEventListener("touchstart", startTone, { once: true });
+    window.addEventListener("keydown", startTone, { once: true });
+
+    const timer = setTimeout(() => {
+      onFinish();
+    }, 7500);
+
+    return () => {
+      clearTimeout(timer);
+      removeListeners();
+      if (audioContext && audioContext.state !== "closed") {
+        audioContext.close().catch(() => {});
+      }
+    };
+  }, [onFinish]);
 
   return (
     <div className="fixed inset-0 bg-[#0B0F1A] flex items-center justify-center overflow-hidden z-50">
