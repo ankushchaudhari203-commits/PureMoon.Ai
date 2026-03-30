@@ -10,6 +10,8 @@ import HelpModal from "./components/HelpModal";
 import OnboardingTour, { type TourStep } from "./components/OnboardingTour";
 import { trackUserEmail } from "@/lib/userService";
 
+const TOUR_STORAGE_KEY = "puremoon-dashboard-tour-seen";
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
 
@@ -68,6 +70,19 @@ export default function Dashboard() {
         name: session.user.name || undefined,
         image: session.user.image || undefined,
       });
+    }
+  }, [session?.user?.email]);
+
+  useEffect(() => {
+    if (!session?.user?.email) return;
+
+    const storageKey = `${TOUR_STORAGE_KEY}:${session.user.email}`;
+    const hasSeenTour = window.localStorage.getItem(storageKey);
+
+    if (!hasSeenTour) {
+      setIsTourActive(true);
+      setCurrentTourStep(tourStepOrder[0]);
+      window.localStorage.setItem(storageKey, "true");
     }
   }, [session?.user?.email]);
 
