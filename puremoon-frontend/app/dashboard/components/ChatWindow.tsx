@@ -510,14 +510,15 @@ const handleDownloadPDF = async () => {
     setShowWelcome(false);
 
     let convId = conversationId;
+    const userEmail = session?.user?.email ?? undefined;
 
     if (!convId) {
-      convId = await createConversation(text, session?.user?.email);
+      convId = await createConversation(text, userEmail);
       if (convId) setConversationId(convId);
     }
 
     if (convId) {
-      const saved = await saveMessage(convId, "user", text, null, session?.user?.email);
+      const saved = await saveMessage(convId, "user", text, null, userEmail);
       if (saved.error) {
         console.error("User message save failed", saved.error);
       }
@@ -639,7 +640,7 @@ const handleDownloadPDF = async () => {
           "ai",
           aiMessage.content,
           tripDataToSave,
-          session?.user?.email
+          userEmail
         );
 
         if (saved.error) {
