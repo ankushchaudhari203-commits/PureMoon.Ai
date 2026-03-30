@@ -327,7 +327,7 @@ const handleDownloadPDF = async () => {
         return null;
       }
     })
-    .filter((item) => item));
+    .filter((item: any) => item));
 
   const formatted = data.map((msg: any) => ({
     role: msg.role,
