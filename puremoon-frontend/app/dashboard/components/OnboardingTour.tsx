@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
 
 export type TourStep = "new-chat" | "clear-chats" | "settings" | "input" | null;
+type ActiveTourStep = Exclude<TourStep, null>;
 
 type OnboardingTourProps = {
   currentStep: TourStep;
@@ -13,7 +14,7 @@ type OnboardingTourProps = {
   isActive: boolean;
 };
 
-const TOUR_STEPS: Record<TourStep, { title: string; description: string; icon: string }> = {
+const TOUR_STEPS: Record<ActiveTourStep, { title: string; description: string; icon: string }> = {
   "new-chat": {
     title: "Create New Chat",
     description: "Start a fresh conversation by clicking the New Chat button. Each chat is a new trip planning session.",
@@ -34,7 +35,6 @@ const TOUR_STEPS: Record<TourStep, { title: string; description: string; icon: s
     description: "Type your travel questions, preferences, or requirements. Exmples :plan a 2 day trip to Maimi in budget 500$",
     icon: "💬",
   },
-  null: { title: "", description: "", icon: "" },
 };
 
 export default function OnboardingTour({
@@ -52,9 +52,10 @@ export default function OnboardingTour({
   if (!mounted || !isActive || !currentStep) return null;
 
   const step = TOUR_STEPS[currentStep];
+  const orderedSteps = Object.keys(TOUR_STEPS) as ActiveTourStep[];
   const isLastStep = currentStep === "input";
-  const stepNumber = Object.keys(TOUR_STEPS).indexOf(currentStep);
-  const totalSteps = Object.keys(TOUR_STEPS).length - 1;
+  const stepNumber = orderedSteps.indexOf(currentStep) + 1;
+  const totalSteps = orderedSteps.length;
 
   return (
     <>
@@ -121,15 +122,16 @@ export default function OnboardingTour({
 }
 
 function HighlightBox({ currentStep }: { currentStep: TourStep }) {
-  const positions: Record<TourStep, { top: string; left: string; width: string; height: string }> = {
+  const positions: Record<ActiveTourStep, { top: string; left: string; width: string; height: string }> = {
     "new-chat": { top: "90px", left: "12px", width: "320px", height: "56px" },
     "clear-chats": { top: "296px", left: "12px", width: "320px", height: "44px" },
     settings: { top: "360px", left: "12px", width: "120px", height: "44px" },
     input: { top: "calc(100% - 120px)", left: "50%", width: "calc(100% - 32px)", height: "100px" },
-    null: { top: "0", left: "0", width: "0", height: "0" },
   };
 
-  const pos = positions[currentStep || "null"];
+  if (!currentStep) return null;
+
+  const pos = positions[currentStep];
 
   return (
     <motion.div
