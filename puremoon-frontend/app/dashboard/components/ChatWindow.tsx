@@ -690,11 +690,20 @@ const handleDownloadPDF = async () => {
   setSplitDetails(peopleData);   // ✅ NEW
   
 
-  if (conversationId) {
-    await saveMessage(conversationId, "ai", "Split expense calculated", {
-      split_expense: res,
-      split_details: peopleData   // ✅ SAVE THIS TOO
-    });
+  const activeConversationId = conversationId;
+
+  if (!activeConversationId) {
+    console.warn("Split expense result was generated without an active conversation.");
+    return;
+  }
+
+  const saved = await saveMessage(activeConversationId, "ai", "Split expense calculated", {
+    split_expense: res,
+    split_details: peopleData   // ✅ SAVE THIS TOO
+  });
+
+  if (saved.error) {
+    console.error("Split expense save failed", saved.error);
   }
 }}
       />
