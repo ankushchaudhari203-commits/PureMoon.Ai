@@ -311,7 +311,7 @@ const handleDownloadPDF = async () => {
 
   const loadConversation = async (conversationId: string) => {
 
-  const data = await getMessages(conversationId);
+  const data = await getMessages(conversationId, session?.user?.email ?? undefined);
 
   console.log("loadConversation:", conversationId);
   console.log("messages:", data);
@@ -700,7 +700,7 @@ const handleDownloadPDF = async () => {
   const saved = await saveMessage(activeConversationId, "ai", "Split expense calculated", {
     split_expense: res,
     split_details: peopleData   // ✅ SAVE THIS TOO
-  });
+  }, session?.user?.email ?? undefined);
 
   if (saved.error) {
     console.error("Split expense save failed", saved.error);

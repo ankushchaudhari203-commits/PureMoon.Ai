@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 from datetime import datetime, timezone
+
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
 
 from api.db import get_supabase
 
@@ -28,11 +29,12 @@ class UserTrackRequest(BaseModel):
 
 
 @router.get("/conversations")
-def get_conversations():
+def get_conversations(user_email: str = Query(...)):
     supabase = get_supabase()
     response = (
         supabase.table("conversations")
         .select("*")
+        .eq("user_id", user_email)
         .order("created_at", desc=True)
         .execute()
     )
@@ -41,6 +43,9 @@ def get_conversations():
 
 @router.post("/conversations")
 def create_conversation(payload: ConversationCreateRequest):
+    if not payload.user_email:
+        raise HTTPException(status_code=400, detail="user_email is required")
+
     supabase = get_supabase()
     short_title = (
         payload.title[:30] + "..." if len(payload.title) > 30 else payload.title
@@ -65,8 +70,20 @@ def create_conversation(payload: ConversationCreateRequest):
 
 
 @router.get("/conversations/{conversation_id}/messages")
-def get_messages(conversation_id: str):
+def get_messages(conversation_id: str, user_email: str = Query(...)):
     supabase = get_supabase()
+    conversation = (
+        supabase.table("conversations")
+        .select("id")
+        .eq("id", conversation_id)
+        .eq("user_id", user_email)
+        .limit(1)
+        .execute()
+    )
+
+    if not (conversation.data or []):
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
     response = (
         supabase.table("messages")
         .select("*")
@@ -79,7 +96,22 @@ def get_messages(conversation_id: str):
 
 @router.post("/messages")
 def create_message(payload: MessageCreateRequest):
+    if not payload.user_email:
+        raise HTTPException(status_code=400, detail="user_email is required")
+
     supabase = get_supabase()
+    conversation = (
+        supabase.table("conversations")
+        .select("id")
+        .eq("id", payload.conversation_id)
+        .eq("user_id", payload.user_email)
+        .limit(1)
+        .execute()
+    )
+
+    if not (conversation.data or []):
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
     response = (
         supabase.table("messages")
         .insert(
@@ -163,11 +195,12 @@ def get_user(email: str):
 
 
 @router.get("/users")
-def get_users():
+def get_users(user_email: str = Query(...)):
     supabase = get_supabase()
     response = (
         supabase.table("users")
         .select("*")
+        .eq("email", user_email)
         .order("created_at", desc=True)
         .execute()
     )

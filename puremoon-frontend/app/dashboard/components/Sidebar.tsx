@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { trackEvent } from "@/lib/analytics";
 import { getConversations } from "@/lib/historyService";
 import { apiFetch } from "@/lib/api";
@@ -26,6 +27,7 @@ export default function Sidebar({
 }: SidebarProps) {
 
   const router = useRouter();
+  const { data: session } = useSession();
 
   const [open, setOpen] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
@@ -33,7 +35,7 @@ export default function Sidebar({
   // ✅ Load History
   const loadHistory = async () => {
     try {
-      const data = await getConversations();
+      const data = await getConversations(session?.user?.email ?? undefined);
       setHistory(data);
     } catch (error) {
       console.error("History load error:", error);
@@ -46,7 +48,10 @@ export default function Sidebar({
     if (!confirmDelete) return;
 
     try {
-      await apiFetch(`/chat/delete/${id}`, {
+      const userEmail = session?.user?.email;
+      if (!userEmail) return;
+
+      await apiFetch(`/chat/delete/${id}?user_email=${encodeURIComponent(userEmail)}`, {
         method: "DELETE",
       });
 
@@ -64,7 +69,10 @@ export default function Sidebar({
     if (!confirmDelete) return;
 
     try {
-      await apiFetch("/chat/clear-all", {
+      const userEmail = session?.user?.email;
+      if (!userEmail) return;
+
+      await apiFetch(`/chat/clear-all?user_email=${encodeURIComponent(userEmail)}`, {
         method: "DELETE",
       });
 
@@ -79,7 +87,7 @@ export default function Sidebar({
   // Load history on mount
   useEffect(() => {
     loadHistory();
-  }, []);
+  }, [session?.user?.email]);
 
   return (
     <div className="w-80 bg-white/[0.03] backdrop-blur-xl border-r border-white/10 px-6 py-8 flex flex-col">
