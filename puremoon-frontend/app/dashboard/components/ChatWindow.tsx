@@ -714,7 +714,7 @@ const handleDownloadPDF = async () => {
 )}
 
       {/* Chat Section */}
-      <div className="flex flex-col flex-1 h-screen">
+      <div className="flex flex-col flex-1 min-h-screen">
 
         {showWelcome && messages.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center text-center px-10">
@@ -724,7 +724,7 @@ const handleDownloadPDF = async () => {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto px-16 py-10 space-y-8 pb-32">
+        <div className="flex-1 overflow-y-auto bg-transparent px-16 py-10 space-y-8 pb-32">
 
           {messages.map((msg, index) => (
             <div
@@ -1080,7 +1080,7 @@ const handleDownloadPDF = async () => {
         </div>
 
         
-        <div className="sticky bottom-0 bg-[#0D1322]/82 backdrop-blur-xl px-16 py-6 border-t border-white/10">
+        <div className="sticky bottom-0 bg-[linear-gradient(180deg,rgba(9,13,22,0.18),rgba(9,13,22,0.68))] backdrop-blur-xl px-16 py-6 border-t border-white/10">
   <ChatInput 
   onSend={sendMessage} 
   showActions={(itinerary?.length || 0) > 0 && !thinking}
@@ -1093,7 +1093,7 @@ const handleDownloadPDF = async () => {
 
       
       {/* Trip Intelligence Panel */}
-      <div className="w-80 border-l border-white/10 px-6 py-8 bg-[linear-gradient(180deg,rgba(17,24,39,0.72),rgba(17,24,39,0.5))] backdrop-blur-xl">
+      <div className="w-80 border-l border-white/10 px-6 py-8 bg-white/[0.03] backdrop-blur-xl">
 
         <h3 className="text-xl font-semibold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           Trip Intelligence
