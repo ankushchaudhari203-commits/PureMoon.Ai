@@ -1080,7 +1080,7 @@ const handleDownloadPDF = async () => {
         </div>
 
         
-        <div className="sticky bottom-0 bg-[#0F2554]/78 backdrop-blur-2xl px-16 py-6 border-t border-white/10">
+        <div className="sticky bottom-0 bg-[#0D1322]/82 backdrop-blur-xl px-16 py-6 border-t border-white/10">
   <ChatInput 
   onSend={sendMessage} 
   showActions={(itinerary?.length || 0) > 0 && !thinking}
@@ -1093,7 +1093,7 @@ const handleDownloadPDF = async () => {
 
       
       {/* Trip Intelligence Panel */}
-      <div className="w-80 border-l border-white/10 px-6 py-8 bg-[linear-gradient(180deg,rgba(15,37,84,0.58),rgba(15,37,84,0.38))] backdrop-blur-2xl">
+      <div className="w-80 border-l border-white/10 px-6 py-8 bg-[linear-gradient(180deg,rgba(17,24,39,0.72),rgba(17,24,39,0.5))] backdrop-blur-xl">
 
         <h3 className="text-xl font-semibold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           Trip Intelligence
