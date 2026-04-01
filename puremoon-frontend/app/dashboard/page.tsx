@@ -100,7 +100,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-[#0B0F1A] via-[#111827] to-[#0F172A] text-white">
+    <div className="flex h-screen bg-gradient-to-br from-[#10214A] via-[#17336C] to-[#1A3F85] text-white">
 
       <Sidebar
   onHelp={() => setShowHelp(true)}
