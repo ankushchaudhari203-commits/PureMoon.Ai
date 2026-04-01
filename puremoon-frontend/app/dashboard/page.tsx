@@ -100,7 +100,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.18),_transparent_36%),linear-gradient(135deg,_#090D16_0%,_#0F1728_50%,_#12203A_100%)] text-white">
+    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.18),_transparent_36%),linear-gradient(135deg,_#090D16_0%,_#0F1728_50%,_#12203A_100%)] text-white">
 
       <Sidebar
   onHelp={() => setShowHelp(true)}
@@ -116,7 +116,7 @@ export default function Dashboard() {
   onStartTour={startTour}
 />
 
-      <div className="flex flex-col flex-1">
+      <div className="flex min-h-screen flex-1 flex-col">
         <Topbar />
 
         <ChatWindow

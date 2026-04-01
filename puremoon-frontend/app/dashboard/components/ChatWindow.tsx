@@ -714,7 +714,7 @@ const handleDownloadPDF = async () => {
 )}
 
       {/* Chat Section */}
-      <div className="flex flex-col flex-1 min-h-screen">
+      <div className="flex min-h-screen flex-1 flex-col">
 
         {showWelcome && messages.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center text-center px-10">
@@ -724,7 +724,7 @@ const handleDownloadPDF = async () => {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto bg-transparent px-16 py-10 space-y-8 pb-32">
+        <div className="flex-1 bg-transparent px-16 py-10 space-y-8 pb-32">
 
           {messages.map((msg, index) => (
             <div
@@ -1093,7 +1093,7 @@ const handleDownloadPDF = async () => {
 
       
       {/* Trip Intelligence Panel */}
-      <div className="w-80 border-l border-white/10 px-6 py-8 bg-white/[0.03] backdrop-blur-xl">
+      <div className="sticky top-0 h-screen w-80 self-start border-l border-white/10 px-6 py-8 bg-white/[0.03] backdrop-blur-xl">
 
         <h3 className="text-xl font-semibold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           Trip Intelligence

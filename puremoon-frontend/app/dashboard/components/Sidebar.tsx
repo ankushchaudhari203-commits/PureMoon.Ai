@@ -82,7 +82,7 @@ export default function Sidebar({
   }, []);
 
   return (
-    <div className="w-80 bg-white/[0.03] backdrop-blur-xl border-r border-white/10 px-6 py-8 flex flex-col">
+    <div className="sticky top-0 h-screen w-80 self-start bg-white/[0.03] backdrop-blur-xl border-r border-white/10 px-6 py-8 flex flex-col">
 
       {/* Logo */}
       <h1 className="text-2xl font-semibold tracking-tight mb-10
