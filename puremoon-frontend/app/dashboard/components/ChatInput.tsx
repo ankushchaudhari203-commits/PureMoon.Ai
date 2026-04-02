@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
+<<<<<<< HEAD
 
 
 export default function ChatInput({
@@ -11,6 +12,20 @@ export default function ChatInput({
 }: {
   onSend: (text: string) => void;
   showActions?: boolean;
+=======
+import type { TourStep } from "./OnboardingTour";
+
+export default function ChatInput({
+  onSend,
+  showActions,
+  activeTourStep,
+  isHighlighted
+}: {
+  onSend: (text: string) => void;
+  showActions?: boolean;
+  activeTourStep?: TourStep;
+  isHighlighted?: (step: TourStep) => boolean;
+>>>>>>> master
 }) {
 
   const [text, setText] = useState("");
@@ -125,7 +140,12 @@ export default function ChatInput({
 )}
 
       {/* ✅ INPUT (always visible) */}
+<<<<<<< HEAD
       <div className="flex items-center gap-3 bg-[#0F172A] border border-white/10 rounded-xl px-4 py-3">
+=======
+      <div className={`flex items-center gap-3 bg-[#0F172A] border border-white/10 rounded-xl px-4 py-3
+                      ${isHighlighted?.("input") ? "ring-2 ring-purple-400" : ""}`}>
+>>>>>>> master
 
         <input
           type="text"

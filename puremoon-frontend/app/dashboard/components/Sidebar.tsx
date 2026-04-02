@@ -2,28 +2,54 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+<<<<<<< HEAD
 import { supabase } from "@/lib/supabase";
 import { trackEvent } from "@/lib/analytics";
+=======
+import { useSession } from "next-auth/react";
+import { trackEvent } from "@/lib/analytics";
+import { getConversations } from "@/lib/historyService";
+import { apiFetch } from "@/lib/api";
+import type { TourStep } from "./OnboardingTour";
+>>>>>>> master
 
 type SidebarProps = {
   onHelp: () => void;
   onNewChat: () => void;
   onSelectConversation?: (id: string) => void;
+<<<<<<< HEAD
+=======
+  activeTourStep?: TourStep;
+  isHighlighted?: (step: TourStep) => boolean;
+  onStartTour?: () => void;
+>>>>>>> master
 };
 
 export default function Sidebar({
   onHelp,
   onNewChat,
+<<<<<<< HEAD
   onSelectConversation
 }: SidebarProps) {
 
   const router = useRouter();
+=======
+  onSelectConversation,
+  activeTourStep,
+  isHighlighted,
+  onStartTour
+}: SidebarProps) {
+
+  const router = useRouter();
+  const { data: session } = useSession();
+>>>>>>> master
 
   const [open, setOpen] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
 
   // ✅ Load History
   const loadHistory = async () => {
+<<<<<<< HEAD
     const { data, error } = await supabase
       .from("conversations")
       .select("*")
@@ -31,6 +57,14 @@ export default function Sidebar({
 
     if (data) setHistory(data);
     if (error) console.error("History load error:", error);
+=======
+    try {
+      const data = await getConversations(session?.user?.email ?? undefined);
+      setHistory(data);
+    } catch (error) {
+      console.error("History load error:", error);
+    }
+>>>>>>> master
   };
 
   // ✅ Delete Single Conversation
@@ -39,7 +73,14 @@ export default function Sidebar({
     if (!confirmDelete) return;
 
     try {
+<<<<<<< HEAD
       await fetch(`http://localhost:8000/chat/delete/${id}`, {
+=======
+      const userEmail = session?.user?.email;
+      if (!userEmail) return;
+
+      await apiFetch(`/chat/delete/${id}?user_email=${encodeURIComponent(userEmail)}`, {
+>>>>>>> master
         method: "DELETE",
       });
 
@@ -57,7 +98,14 @@ export default function Sidebar({
     if (!confirmDelete) return;
 
     try {
+<<<<<<< HEAD
       await fetch(`http://localhost:8000/chat/clear-all`, {
+=======
+      const userEmail = session?.user?.email;
+      if (!userEmail) return;
+
+      await apiFetch(`/chat/clear-all?user_email=${encodeURIComponent(userEmail)}`, {
+>>>>>>> master
         method: "DELETE",
       });
 
@@ -72,10 +120,17 @@ export default function Sidebar({
   // Load history on mount
   useEffect(() => {
     loadHistory();
+<<<<<<< HEAD
   }, []);
 
   return (
     <div className="w-80 bg-white/5 backdrop-blur-xl border-r border-white/10 px-6 py-8 flex flex-col">
+=======
+  }, [session?.user?.email]);
+
+  return (
+    <div className="w-80 bg-white/[0.03] backdrop-blur-xl border-r border-white/10 px-6 py-8 flex flex-col">
+>>>>>>> master
 
       {/* Logo */}
       <h1 className="text-2xl font-semibold tracking-tight mb-10
@@ -90,6 +145,7 @@ export default function Sidebar({
         trackEvent("new_chat_clicked");
         onNewChat();
         }}
+<<<<<<< HEAD
         className="mb-8 px-5 py-3 rounded-xl
                    bg-gradient-to-r from-purple-600 to-blue-600
                    text-white text-[15px] font-medium
@@ -97,6 +153,16 @@ export default function Sidebar({
                    hover:opacity-90 transition-all duration-200"
       >
         + New Chat
+=======
+        className={`mb-8 px-5 py-3 rounded-xl
+                   bg-gradient-to-r from-purple-600 to-blue-600
+                   text-white text-[15px] font-medium
+                   shadow-lg shadow-purple-500/20
+                   hover:opacity-90 transition-all duration-200
+                   ${isHighlighted?.("new-chat") ? "ring-2 ring-purple-400" : ""}`}
+      >
+        ➕ New Chat
+>>>>>>> master
       </button>
 
       {/* History Title */}
@@ -148,6 +214,7 @@ export default function Sidebar({
       {/* 🔥 Clear All Button */}
       <button
         onClick={clearAllChats}
+<<<<<<< HEAD
         className="w-full text-left text-sm text-red-400 hover:text-red-300 
                    mt-4 px-4 py-2 rounded-lg hover:bg-red-500/10 transition"
       >
@@ -156,6 +223,17 @@ export default function Sidebar({
 
       {/* Settings */}
       <div className="relative mt-6 border-t border-white/5 pt-6">
+=======
+        className={`w-full text-left text-sm text-red-400 hover:text-red-300 
+                   mt-4 px-4 py-2 rounded-lg hover:bg-red-500/10 transition
+                   ${isHighlighted?.("clear-chats") ? "ring-2 ring-purple-400" : ""}`}
+      >
+        🧹 Clear All Chats
+      </button>
+
+      {/* Settings */}
+      <div className={`relative mt-6 border-t border-white/5 pt-6 ${isHighlighted?.("settings") ? "ring-2 ring-purple-400 rounded-lg p-2 -m-2" : ""}`}>
+>>>>>>> master
 
         <button
           onClick={() => {
@@ -166,7 +244,11 @@ export default function Sidebar({
 }}
           className="text-[15px] font-medium text-gray-400 hover:text-white transition"
         >
+<<<<<<< HEAD
           Settings
+=======
+          ⚙️ Settings
+>>>>>>> master
         </button>
 
         {open && (
@@ -177,6 +259,20 @@ export default function Sidebar({
 
             <div
               onClick={() => {
+<<<<<<< HEAD
+=======
+                trackEvent("tour_started");
+                onStartTour?.();
+                setOpen(false);
+              }}
+              className="px-4 py-3 text-[15px] text-blue-300 hover:bg-blue-500/10 cursor-pointer"
+            >
+              📖 Start Tour
+            </div>
+
+            <div
+              onClick={() => {
+>>>>>>> master
               trackEvent("exit_clicked");
               router.push("/");
               }}
@@ -215,4 +311,8 @@ export default function Sidebar({
 
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> master

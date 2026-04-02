@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
+<<<<<<< HEAD
   --background: #ffffff;
   --foreground: #171717;
+=======
+  --background: #0b0f1a;
+  --foreground: #ededed;
+>>>>>>> master
 }
 
 @theme inline {
@@ -12,6 +17,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
+<<<<<<< HEAD
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -19,10 +25,17 @@
   }
 }
 
+=======
+html,
+>>>>>>> master
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+<<<<<<< HEAD
+=======
+  min-height: 100%;
+>>>>>>> master
 }
 /* PUREMOON SCROLLBAR */
 
@@ -41,4 +54,8 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(160, 160, 180, 0.6);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> master

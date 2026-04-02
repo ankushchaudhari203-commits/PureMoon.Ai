@@ -7,6 +7,13 @@ import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 import ChatWindow from "./components/ChatWindow";
 import HelpModal from "./components/HelpModal";
+<<<<<<< HEAD
+=======
+import OnboardingTour, { type TourStep } from "./components/OnboardingTour";
+import { trackUserEmail } from "@/lib/userService";
+
+const TOUR_STORAGE_KEY = "puremoon-dashboard-tour-seen";
+>>>>>>> master
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -18,9 +25,45 @@ export default function Dashboard() {
   const [budget, setBudget] = useState<number | null>(null);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
 
+<<<<<<< HEAD
   // ⭐ NEW
   const [chatResetKey, setChatResetKey] = useState(0);
 
+=======
+  // ⭐ Tour State
+  const [isTourActive, setIsTourActive] = useState(false);
+  const [currentTourStep, setCurrentTourStep] = useState<TourStep>(null);
+
+  // ⭐ NEW
+  const [chatResetKey, setChatResetKey] = useState(0);
+
+  // ⭐ Tour Control Functions
+  const tourStepOrder: TourStep[] = ["new-chat", "clear-chats", "settings", "input"];
+
+  const startTour = () => {
+    setIsTourActive(true);
+    setCurrentTourStep(tourStepOrder[0]);
+  };
+
+  const nextTourStep = () => {
+    const currentIndex = tourStepOrder.indexOf(currentTourStep || "new-chat");
+    if (currentIndex < tourStepOrder.length - 1) {
+      setCurrentTourStep(tourStepOrder[currentIndex + 1]);
+    } else {
+      endTour();
+    }
+  };
+
+  const endTour = () => {
+    setIsTourActive(false);
+    setCurrentTourStep(null);
+  };
+
+  const isHighlighted = (step: TourStep): boolean => {
+    return isTourActive && currentTourStep === step;
+  };
+
+>>>>>>> master
   // 🔐 Protect dashboard
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -28,6 +71,33 @@ export default function Dashboard() {
     }
   }, [status]);
 
+<<<<<<< HEAD
+=======
+  // 📧 Track user email on login
+  useEffect(() => {
+    if (session?.user?.email) {
+      trackUserEmail({
+        email: session.user.email,
+        name: session.user.name || undefined,
+        image: session.user.image || undefined,
+      });
+    }
+  }, [session?.user?.email]);
+
+  useEffect(() => {
+    if (!session?.user?.email) return;
+
+    const storageKey = `${TOUR_STORAGE_KEY}:${session.user.email}`;
+    const hasSeenTour = window.localStorage.getItem(storageKey);
+
+    if (!hasSeenTour) {
+      setIsTourActive(true);
+      setCurrentTourStep(tourStepOrder[0]);
+      window.localStorage.setItem(storageKey, "true");
+    }
+  }, [session?.user?.email]);
+
+>>>>>>> master
   // ⏳ Loading
   if (status === "loading") {
     return (
@@ -42,7 +112,11 @@ export default function Dashboard() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="flex h-screen bg-gradient-to-br from-[#0B0F1A] via-[#111827] to-[#0F172A] text-white">
+=======
+    <div className="flex h-screen bg-[#0B0F1A] text-white">
+>>>>>>> master
 
       <Sidebar
   onHelp={() => setShowHelp(true)}
@@ -53,6 +127,12 @@ export default function Dashboard() {
   onSelectConversation={(id: string) => {
     setSelectedConversation(id);
   }}
+<<<<<<< HEAD
+=======
+  activeTourStep={currentTourStep}
+  isHighlighted={isHighlighted}
+  onStartTour={startTour}
+>>>>>>> master
 />
 
       <div className="flex flex-col flex-1">
@@ -64,11 +144,30 @@ export default function Dashboard() {
   setDays={setDays}
   setBudget={setBudget}
   selectedConversation={selectedConversation}
+<<<<<<< HEAD
+=======
+  activeTourStep={currentTourStep}
+  isHighlighted={isHighlighted}
+>>>>>>> master
 />
       </div>
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
 
+<<<<<<< HEAD
     </div>
   );
 }
+=======
+      {/* 🎓 Onboarding Tour */}
+      <OnboardingTour
+        currentStep={currentTourStep}
+        onNextStep={nextTourStep}
+        onSkip={endTour}
+        isActive={isTourActive}
+      />
+
+    </div>
+  );
+}
+>>>>>>> master

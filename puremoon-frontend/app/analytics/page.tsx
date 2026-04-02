@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+<<<<<<< HEAD
+=======
+import { apiFetch } from "@/lib/api";
+>>>>>>> master
 import {
   BarChart,
   Bar,
@@ -15,8 +19,12 @@ export default function AnalyticsPage() {
   const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
+<<<<<<< HEAD
     fetch("http://localhost:8000/analytics/events")
       .then(res => res.json())
+=======
+    apiFetch("/analytics/events")
+>>>>>>> master
       .then(data => setEvents(data.events || []))
       .catch(console.error);
   }, []);
@@ -179,4 +187,8 @@ function Card({ title, value }: { title: string; value: any }) {
       <p className="text-xl font-semibold mt-1">{value}</p>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> master

@@ -1,4 +1,11 @@
 import requests
+<<<<<<< HEAD
+=======
+import urllib3
+
+# Suppress SSL warnings (safe for trusted APIs)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+>>>>>>> master
 
 
 class WeatherService:
@@ -17,7 +24,11 @@ class WeatherService:
             "count": 1
         }
 
+<<<<<<< HEAD
         response = requests.get(self.GEO_URL, params=params)
+=======
+        response = requests.get(self.GEO_URL, params=params, verify=False, timeout=10)
+>>>>>>> master
 
         data = response.json()
 
@@ -49,7 +60,11 @@ class WeatherService:
             "current_weather": True
         }
 
+<<<<<<< HEAD
         response = requests.get(self.WEATHER_URL, params=params)
+=======
+        response = requests.get(self.WEATHER_URL, params=params, verify=False, timeout=10)
+>>>>>>> master
 
         data = response.json()
 

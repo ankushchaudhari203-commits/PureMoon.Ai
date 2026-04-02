@@ -13,6 +13,10 @@ from core.trip_budget_analyzer import TripBudgetAnalyzer
 from core.trip_modification_engine import TripModificationEngine
 from core.nlp.hybrid_extractor import HybridTravelExtractor
 from core.nlp.food_intent_classifier import FoodIntentClassifier
+<<<<<<< HEAD
+=======
+from core.daily_limit_service import DailyLimitService
+>>>>>>> master
 from app.services.travel_services import TravelServices
 
 
@@ -32,6 +36,10 @@ modifier = TripModificationEngine()
 food_classifier = FoodIntentClassifier()
 travel_services = TravelServices()
 weather_service = WeatherService()
+<<<<<<< HEAD
+=======
+daily_limit_service = DailyLimitService()
+>>>>>>> master
 
 
 extractor = HybridTravelExtractor(api_key=os.getenv("GEMINI_API_KEY"))
@@ -42,6 +50,10 @@ enrichment_service = TripEnrichmentService()
 class ChatInput(BaseModel):
     session_id: str
     message: str
+<<<<<<< HEAD
+=======
+    user_email: str | None = None
+>>>>>>> master
 
 
 @router.post("/travel/chat")
@@ -51,6 +63,7 @@ def travel_chat(chat_input: ChatInput):
     message_lower = user_message.lower()
     weather = None
 
+<<<<<<< HEAD
     # ------------------------------
     # ✅ LIMIT CONTROL (FIXED)
     # ------------------------------
@@ -65,6 +78,8 @@ def travel_chat(chat_input: ChatInput):
             "state": "limit_exceeded"
     }
 
+=======
+>>>>>>> master
     travel_service_links = None
 
     # Detect food intent
@@ -209,10 +224,30 @@ def travel_chat(chat_input: ChatInput):
     # Generate itinerary
     # ------------------------------
 
+<<<<<<< HEAD
     # ✅ Increment usage AFTER passing limit
     #session_manager.increment_usage(chat_input.session_id)
 
     response = travel_expert.generate_itinerary(current_request)
+=======
+    if daily_limit_service.is_limit_exceeded(
+        chat_input.user_email, chat_input.session_id
+    ):
+        usage = daily_limit_service.get_usage(
+            chat_input.user_email, chat_input.session_id
+        )
+        return {
+            "reply": "⚠️ You have reached your free itinerary limit for today.",
+            "state": "limit_exceeded",
+            "limit": usage["limit"],
+            "remaining_attempts": usage["remaining"],
+        }
+
+    response = travel_expert.generate_itinerary(current_request)
+    usage = daily_limit_service.record_generation(
+        chat_input.user_email, chat_input.session_id
+    )
+>>>>>>> master
 
     session_manager.store_itinerary(
         chat_input.session_id,
@@ -248,5 +283,12 @@ def travel_chat(chat_input: ChatInput):
             "days": current_request.days,
             "budget": current_request.budget
         },
+<<<<<<< HEAD
         "confidence": confidence
     }
+=======
+        "confidence": confidence,
+        "remaining_attempts": usage["remaining"],
+        "daily_limit": usage["limit"],
+    }
+>>>>>>> master

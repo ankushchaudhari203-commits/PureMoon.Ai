@@ -1,13 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
+=======
+import { useSession } from "next-auth/react";
+>>>>>>> master
 import ChatInput from "./ChatInput";
 import dynamic from "next/dynamic";
 import { createConversation, saveMessage } from "@/lib/chatService";
 import { getMessages } from "@/lib/historyService";
+<<<<<<< HEAD
 import jsPDF from "jspdf";
 import SplitExpense from "./SplitExpense";
 import { trackEvent } from "@/lib/analytics";
+=======
+import { apiFetch } from "@/lib/api";
+import jsPDF from "jspdf";
+import SplitExpense from "./SplitExpense";
+import { trackEvent } from "@/lib/analytics";
+import type { TourStep } from "./OnboardingTour";
+>>>>>>> master
 
 const TripMap = dynamic(() => import("./TripMap"), {
   ssr: false
@@ -35,6 +47,11 @@ type ChatWindowProps = {
   setDays: (value: number | null) => void;
   setBudget: (value: number | null) => void;
   selectedConversation?: string | null;
+<<<<<<< HEAD
+=======
+  activeTourStep?: TourStep;
+  isHighlighted?: (step: TourStep) => boolean;
+>>>>>>> master
 };
 
 type NightlifePlace = {
@@ -44,13 +61,69 @@ type NightlifePlace = {
   maps_link?: string
 }
 
+<<<<<<< HEAD
+=======
+const asArray = (value: any) => (Array.isArray(value) ? value : []);
+
+const extractTripSnapshot = (rawTripData: any) => {
+  if (!rawTripData) return null;
+
+  let parsed = rawTripData;
+
+  if (typeof parsed === "string") {
+    try {
+      parsed = JSON.parse(parsed);
+    } catch {
+      console.warn("Unable to parse trip_data; using raw value", rawTripData);
+      return null;
+    }
+  }
+
+  if (!parsed || typeof parsed !== "object") return null;
+
+  const nestedTrip = parsed.trip_data && typeof parsed.trip_data === "object"
+    ? parsed.trip_data
+    : {};
+
+  return {
+    itinerary: asArray(parsed.itinerary ?? nestedTrip.itinerary),
+    restaurants: asArray(parsed.restaurants ?? nestedTrip.restaurants),
+    hotels: asArray(parsed.hotels ?? nestedTrip.hotels),
+    nightlife: asArray(parsed.nightlife ?? nestedTrip.nightlife),
+    food: asArray(parsed.food ?? nestedTrip.food),
+    destination: parsed.destination ?? nestedTrip.destination ?? "",
+    duration: parsed.duration ?? parsed.days ?? nestedTrip.duration ?? nestedTrip.days ?? "",
+    budget: parsed.budget ?? nestedTrip.budget ?? "",
+    travelers: parsed.travelers ?? nestedTrip.travelers ?? "",
+    trip_advice: parsed.trip_advice ?? nestedTrip.trip_advice ?? null,
+    recommended_hotel: parsed.recommended_hotel ?? nestedTrip.recommended_hotel ?? null,
+    confidence: parsed.confidence ?? nestedTrip.confidence ?? null,
+    travel_services: parsed.travel_services ?? nestedTrip.travel_services ?? null,
+    weather: parsed.weather ?? nestedTrip.weather ?? null,
+    location: parsed.location ?? nestedTrip.location ?? null,
+    split_expense: parsed.split_expense ?? nestedTrip.split_expense ?? [],
+    split_details: parsed.split_details ?? nestedTrip.split_details ?? null,
+  };
+};
+
+>>>>>>> master
 export default function ChatWindow({
   setDestination,
   setDays,
   setBudget,
+<<<<<<< HEAD
   selectedConversation
 }: ChatWindowProps) {
 
+=======
+  selectedConversation,
+  activeTourStep,
+  isHighlighted
+}: ChatWindowProps) {
+
+  const { data: session } = useSession();
+
+>>>>>>> master
   const [messages, setMessages] = useState<Message[]>([]);
   /*const [itinerary, setItinerary] = useState<ItineraryDay[]>([]);*/
   const [nightlife, setNightlife] = useState<NightlifePlace[]>([]);
@@ -259,7 +332,27 @@ const handleDownloadPDF = async () => {
 
   const loadConversation = async (conversationId: string) => {
 
+<<<<<<< HEAD
   const data = await getMessages(conversationId);
+=======
+  const data = await getMessages(conversationId, session?.user?.email ?? undefined);
+
+  console.log("loadConversation:", conversationId);
+  console.log("messages:", data);
+  console.log("trip_data values:", data.map((msg: any) => msg.trip_data));
+  console.log("itinerary from data:", data
+    .map((msg: any) => {
+      if (!msg.trip_data) return null;
+      try {
+        const tripPayload = typeof msg.trip_data === 'string' ? JSON.parse(msg.trip_data) : msg.trip_data;
+        return tripPayload.itinerary || tripPayload?.itinerary;
+      } catch (err) {
+        console.warn('trip_data parse fail', err, msg.trip_data);
+        return null;
+      }
+    })
+    .filter((item: any) => item));
+>>>>>>> master
 
   const formatted = data.map((msg: any) => ({
     role: msg.role,
@@ -276,6 +369,7 @@ const handleDownloadPDF = async () => {
   */
 
   const mergedTrip = data.reduce((acc: any, msg: any) => {
+<<<<<<< HEAD
 
   if (msg.trip_data) {
     return {
@@ -322,6 +416,75 @@ setTripAdvice(trip.trip_advice || null);
     });
 
     setConfidence(trip.confidence || "Low");
+=======
+    if (!msg.trip_data) return acc;
+    const source = extractTripSnapshot(msg.trip_data);
+    if (!source) return acc;
+    const merged = { ...acc };
+
+    // Preserve existing itinerary/records unless new data provides them
+    if (source.itinerary.length > 0) merged.itinerary = source.itinerary;
+    if (source.restaurants.length > 0) merged.restaurants = source.restaurants;
+    if (source.hotels.length > 0) merged.hotels = source.hotels;
+    if (source.nightlife.length > 0) merged.nightlife = source.nightlife;
+    if (source.food.length > 0) merged.food = source.food;
+
+    merged.destination = merged.destination || source.destination;
+    merged.duration = merged.duration || source.duration;
+    merged.budget = merged.budget || source.budget;
+    merged.travelers = merged.travelers || source.travelers;
+
+    merged.trip_advice = merged.trip_advice || source.trip_advice;
+    merged.recommended_hotel = merged.recommended_hotel || source.recommended_hotel;
+    merged.confidence = merged.confidence || source.confidence;
+    merged.travel_services = merged.travel_services || source.travel_services;
+    merged.weather = merged.weather || source.weather;
+    merged.location = merged.location || source.location;
+    merged.split_expense = source.split_expense || merged.split_expense;
+    merged.split_details = source.split_details || merged.split_details;
+
+    return merged;
+  }, {});
+
+  if (Object.keys(mergedTrip).length > 0) {
+    setSplitResult(mergedTrip.split_expense || []);
+    setTravelServices(mergedTrip.travel_services || null);
+    setWeather(mergedTrip.weather || null);
+    setSplitDetails(mergedTrip.split_details || null);
+
+    const trip = mergedTrip;
+
+    setItinerary(Array.isArray(trip.itinerary) ? trip.itinerary : []);
+    setRestaurants(Array.isArray(trip.restaurants) ? trip.restaurants : []);
+    setHotels(Array.isArray(trip.hotels) ? trip.hotels : []);
+    setNightlife(Array.isArray(trip.nightlife) ? trip.nightlife : []);
+    setFoodPlaces(Array.isArray(trip.food) ? trip.food : []);
+
+    setTripAdvice(trip.trip_advice || null);
+    setRecommendedHotel(
+      trip.recommended_hotel || (Array.isArray(trip.hotels) ? trip.hotels[0] : null) || null
+    );
+
+    setTripData({
+      destination: trip.destination || "",
+      duration: trip.duration || "",
+      budget: trip.budget ? `$${trip.budget}` : "",
+      travelers: trip.travelers ? String(trip.travelers) : "",
+    });
+
+    setConfidence(trip.confidence || "Low");
+  } else {
+    // Reset itinerary state when selected conversation has no trip_data
+    setItinerary([]);
+    setRestaurants([]);
+    setHotels([]);
+    setNightlife([]);
+    setFoodPlaces([]);
+    setTripAdvice(null);
+    setRecommendedHotel(null);
+    setTripData({ destination: "", duration: "", budget: "", travelers: "" });
+    setConfidence("Low");
+>>>>>>> master
   }
 };
 
@@ -421,14 +584,28 @@ setTripAdvice(trip.trip_advice || null);
     setShowWelcome(false);
 
     let convId = conversationId;
+<<<<<<< HEAD
 
     if (!convId) {
       convId = await createConversation(text);
+=======
+    const userEmail = session?.user?.email ?? undefined;
+
+    if (!convId) {
+      convId = await createConversation(text, userEmail);
+>>>>>>> master
       if (convId) setConversationId(convId);
     }
 
     if (convId) {
+<<<<<<< HEAD
       saveMessage(convId, "user", text);
+=======
+      const saved = await saveMessage(convId, "user", text, null, userEmail);
+      if (saved.error) {
+        console.error("User message save failed", saved.error);
+      }
+>>>>>>> master
     }
 
     try {
@@ -438,6 +615,7 @@ setTripAdvice(trip.trip_advice || null);
 
       localStorage.setItem("session_id", sessionId); //added logic for session management
       
+<<<<<<< HEAD
       const response = await fetch("http://localhost:8000/travel/chat", {
         method: "POST",
         headers: {
@@ -450,6 +628,16 @@ setTripAdvice(trip.trip_advice || null);
       });
 
       const data = await response.json();
+=======
+      const data = await apiFetch("/travel/chat", {
+        method: "POST",
+        json: {
+          session_id: sessionId,
+          message: text,
+          user_email: session?.user?.email || null,
+        },
+      });
+>>>>>>> master
       if (data.itinerary) {
         trackEvent("itinerary_generated", {
           destination: data.trip_data?.destination || "unknown",
@@ -479,6 +667,7 @@ setTripAdvice(trip.trip_advice || null);
       console.log("FULL BACKEND RESPONSE:", data);
 
       if (data.itinerary) {
+<<<<<<< HEAD
   setItinerary(data.itinerary);
 }
 
@@ -503,6 +692,32 @@ setRestaurants(data.restaurants || []);
 setHotels(data.hotels || []);
 setTravelServices(data.travel_services);
 setWeather(data.weather);
+=======
+        setItinerary(data.itinerary);
+      }
+
+      if (data.restaurants) {
+        setRestaurants(data.restaurants);
+      }
+
+      if (data.hotels) {
+        setHotels(data.hotels);
+      }
+
+      if (data.nightlife) {
+        setNightlife(data.nightlife);
+      }
+
+      if (data.food) {
+        setFoodPlaces(data.food);
+      }
+
+      setItinerary(data.itinerary || []);
+      setRestaurants(data.restaurants || []);
+      setHotels(data.hotels || []);
+      setTravelServices(data.travel_services);
+      setWeather(data.weather);
+>>>>>>> master
 
       setItinerary(data.itinerary || []);
       setRestaurants(data.restaurants || []);
@@ -531,8 +746,39 @@ setWeather(data.weather);
       setMessages((prev) => [...prev, aiMessage]);
 
       if (convId) {
+<<<<<<< HEAD
         saveMessage(convId, "ai", aiMessage.content, data);
         console.log("Saving to DB:", data);
+=======
+        const tripDataToSave = {
+          ...data.trip_data,
+          itinerary: data.itinerary || [],
+          restaurants: data.restaurants || [],
+          hotels: data.hotels || [],
+          nightlife: data.nightlife || [],
+          food: data.food || [],
+          travel_services: data.travel_services || null,
+          weather: data.weather || null,
+          trip_advice: data.trip_advice || null,
+          recommended_hotel:
+            data.recommended_hotel || (data.hotels && data.hotels[0]) || null,
+          confidence: data.confidence || null,
+        };
+
+        const saved = await saveMessage(
+          convId,
+          "ai",
+          aiMessage.content,
+          tripDataToSave,
+          userEmail
+        );
+
+        if (saved.error) {
+          console.error("AI message save failed", saved.error);
+        }
+
+        console.log("Saving to DB:", tripDataToSave);
+>>>>>>> master
       }
 
     } catch (error) {
@@ -575,11 +821,28 @@ setWeather(data.weather);
   setSplitDetails(peopleData);   // ✅ NEW
   
 
+<<<<<<< HEAD
   if (conversationId) {
     await saveMessage(conversationId, "ai", "Split expense calculated", {
       split_expense: res,
       split_details: peopleData   // ✅ SAVE THIS TOO
     });
+=======
+  const activeConversationId = conversationId;
+
+  if (!activeConversationId) {
+    console.warn("Split expense result was generated without an active conversation.");
+    return;
+  }
+
+  const saved = await saveMessage(activeConversationId, "ai", "Split expense calculated", {
+    split_expense: res,
+    split_details: peopleData   // ✅ SAVE THIS TOO
+  }, session?.user?.email ?? undefined);
+
+  if (saved.error) {
+    console.error("Split expense save failed", saved.error);
+>>>>>>> master
   }
 }}
       />
@@ -590,7 +853,11 @@ setWeather(data.weather);
 )}
 
       {/* Chat Section */}
+<<<<<<< HEAD
       <div className="flex flex-col flex-1 h-screen">
+=======
+      <div className="flex flex-col flex-1 min-h-screen">
+>>>>>>> master
 
         {showWelcome && messages.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center text-center px-10">
@@ -600,7 +867,11 @@ setWeather(data.weather);
           </div>
         )}
 
+<<<<<<< HEAD
         <div className="flex-1 overflow-y-auto px-16 py-10 space-y-8 pb-32">
+=======
+        <div className="flex-1 bg-transparent px-16 py-10 space-y-8 pb-32">
+>>>>>>> master
 
           {messages.map((msg, index) => (
             <div
@@ -956,10 +1227,19 @@ setWeather(data.weather);
         </div>
 
         
+<<<<<<< HEAD
         <div className="sticky bottom-0 bg-[#0B0F1A] px-16 py-6 border-t border-white/10">
   <ChatInput 
   onSend={sendMessage} 
   showActions={(itinerary?.length || 0) > 0 && !thinking}
+=======
+        <div className="sticky bottom-0 bg-[linear-gradient(180deg,rgba(9,13,22,0.18),rgba(9,13,22,0.68))] backdrop-blur-xl px-16 py-6 border-t border-white/10">
+  <ChatInput 
+  onSend={sendMessage} 
+  showActions={(itinerary?.length || 0) > 0 && !thinking}
+  activeTourStep={activeTourStep}
+  isHighlighted={isHighlighted}
+>>>>>>> master
 />
 </div>
 
@@ -967,7 +1247,11 @@ setWeather(data.weather);
 
       
       {/* Trip Intelligence Panel */}
+<<<<<<< HEAD
       <div className="w-80 border-l border-white/10 px-6 py-8 bg-white/5 backdrop-blur-xl">
+=======
+      <div className="w-80 border-l border-white/10 px-6 py-8 bg-white/[0.03] backdrop-blur-xl">
+>>>>>>> master
 
         <h3 className="text-xl font-semibold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           Trip Intelligence
@@ -1171,4 +1455,7 @@ setWeather(data.weather);
     </div>
   );
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> master

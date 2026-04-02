@@ -6,6 +6,7 @@ import { useEffect } from "react";
 export default function IntroAnimation({ onFinish }: { onFinish: () => void }) {
   
   useEffect(() => {
+<<<<<<< HEAD
   // PUREMOON COSMIC TONE
   const audioContext = new (window.AudioContext ||
     (window as any).webkitAudioContext)();
@@ -40,6 +41,80 @@ export default function IntroAnimation({ onFinish }: { onFinish: () => void }) {
 
   return () => clearTimeout(timer);
 }, [onFinish]);
+=======
+    const AudioContextClass =
+      window.AudioContext || (window as any).webkitAudioContext;
+
+    let audioContext: AudioContext | null = null;
+    let started = false;
+
+    const removeListeners = () => {
+      window.removeEventListener("pointerdown", startTone);
+      window.removeEventListener("touchstart", startTone);
+      window.removeEventListener("keydown", startTone);
+    };
+
+    const startTone = async () => {
+      if (started || !AudioContextClass) return;
+
+      if (!audioContext) {
+        audioContext = new AudioContextClass();
+      }
+
+      try {
+        if (audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
+
+        const osc1 = audioContext.createOscillator();
+        const osc2 = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(261.63, audioContext.currentTime);
+
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(329.63, audioContext.currentTime);
+
+        gain.gain.setValueAtTime(0.001, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.15, audioContext.currentTime + 0.6);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 3);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc1.start();
+        osc2.start();
+        osc1.stop(audioContext.currentTime + 3);
+        osc2.stop(audioContext.currentTime + 3);
+
+        started = true;
+        removeListeners();
+      } catch (error) {
+        console.warn("Intro audio is waiting for user interaction.", error);
+      }
+    };
+
+    startTone();
+
+    window.addEventListener("pointerdown", startTone, { once: true });
+    window.addEventListener("touchstart", startTone, { once: true });
+    window.addEventListener("keydown", startTone, { once: true });
+
+    const timer = setTimeout(() => {
+      onFinish();
+    }, 7500);
+
+    return () => {
+      clearTimeout(timer);
+      removeListeners();
+      if (audioContext && audioContext.state !== "closed") {
+        audioContext.close().catch(() => {});
+      }
+    };
+  }, [onFinish]);
+>>>>>>> master
 
   return (
     <div className="fixed inset-0 bg-[#0B0F1A] flex items-center justify-center overflow-hidden z-50">
@@ -75,4 +150,8 @@ export default function IntroAnimation({ onFinish }: { onFinish: () => void }) {
 
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> master
